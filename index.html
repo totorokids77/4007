@@ -431,6 +431,18 @@
     color:#b5aa96;
     font-weight:600;
     min-width:28px;
+    cursor:pointer;
+    padding:3px 6px;
+    border-radius:5px;
+    transition:background .15s, color .15s;
+  }
+  .no:hover, .no:focus{
+    background:#efe7d8;
+    color:#8a6d3b;
+    outline:none;
+  }
+  .no:active{
+    background:#e2d5b8;
   }
   .word{
     font-family:var(--serif);
@@ -4681,7 +4693,7 @@ function render(items){
     card.className = 'card' + (markedWords.has(w.no) ? ' marked' : '');
     card.innerHTML = `
       <div class="card-top">
-        <span class="no">No.${w.no}</span>
+        <span class="no" onclick="speakFullByNo(${w.no})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();speakFullByNo(${w.no});}" title="클릭하면 단어+예문 발음이 재생됩니다" role="button" tabindex="0">No.${w.no}</span>
         <span class="word">${w.word}</span>
         <button class="speak-btn" onclick="speak('${w.word}')" title="발음 듣기" aria-label="발음 듣기">🔊</button>
         <button class="mark-btn ${markedWords.has(w.no) ? 'active' : ''}" onclick="toggleMark(${w.no})" title="암기 체크" aria-label="암기 체크">${markedWords.has(w.no) ? '★' : '☆'}</button>
@@ -4709,6 +4721,30 @@ function speak(word){
   utter.lang = 'en-US';
   utter.rate = 0.85;
   window.speechSynthesis.speak(utter);
+}
+
+function speakFullByNo(no){
+  const w = WORDS.find(x => x.no === no);
+  if(!w) return;
+  speakFull(w.word, w.ex);
+}
+
+function speakFull(word, ex){
+  if(!('speechSynthesis' in window)){
+    alert('이 브라우저는 음성 재생을 지원하지 않습니다.');
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const u1 = new SpeechSynthesisUtterance(word + '.');
+  u1.lang = 'en-US';
+  u1.rate = 0.85;
+  window.speechSynthesis.speak(u1);
+  if(ex){
+    const u2 = new SpeechSynthesisUtterance(ex);
+    u2.lang = 'en-US';
+    u2.rate = 0.95;
+    window.speechSynthesis.speak(u2);
+  }
 }
 
 function updateProgress(){
